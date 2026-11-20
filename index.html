@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manchester United FC | แมนเชสเตอร์ ยูไนเต็ด - The Red Devils</title>
+    
+    <!-- โหลด Tailwind CSS สำหรับจัดวาง Layout ที่ทันสมัยและรองรับทุกหน้าจอ -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- โหลดไอคอน Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- โหลดฟอนต์ภาษาไทย Prompt และฟอนต์อังกฤษ Oswald / Inter ตามหลัก UX/UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Oswald:wght@500;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- =========================================================================
+         ส่วนตั้งค่าโทนสีประจำสโมสรแมนเชสเตอร์ ยูไนเต็ด (Color Palette)
+         วิธีเปลี่ยนสีธีม: แก้ไขรหัสสี Hex Code ด้านล่างนี้ได้ทันที
+         ========================================================================= -->
+    <style>
+        :root {
+            --mu-red: #DA291C;          /* สีแดงหลักของสโมสรแมนยู */
+            --mu-dark-red: #9E1B12;     /* สีแดงเข้มสำหรับปุ่มและเงา */
+            --mu-black: #121212;        /* สีดำสนิทสำหรับพื้นหลังหลัก */
+            --mu-charcoal: #1E1E1E;     /* สีเทาเข้มสำหรับการ์ดและ Section */
+            --mu-gold: #FBE122;         /* สีทอง/เหลืองสำหรับไฮไลต์และถ้วยรางวัล */
+            --mu-amber: #D4AF37;        /* สีทองเข้มหรูหรา */
+            --mu-white: #FFFFFF;        /* สีขาวสำหรับตัวอักษรหลัก */
+        }
+
+        body {
+            font-family: 'Prompt', 'Inter', sans-serif;
+            background-color: var(--mu-black);
+            color: var(--mu-white);
+            overflow-x: hidden;
+        }
+
+        .font-display {
+            font-family: 'Oswald', 'Prompt', sans-serif;
+        }
+
+        /* เอฟเฟกต์การ์ดยกตัวเมื่อนำเมาส์ไปชี้ (UX Micro-interaction) */
+        .mu-card {
+            background-color: var(--mu-charcoal);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), 
+                        box-shadow 0.35s ease, 
+                        border-color 0.35s ease;
+        }
+        .mu-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--mu-red);
+            box-shadow: 0 18px 35px -10px rgba(218, 41, 28, 0.35);
+        }
+
+        /* ปุ่มสีแดงสไตล์แมนยู */
+        .btn-mu-primary {
+            background: linear-gradient(135deg, var(--mu-red) 0%, var(--mu-dark-red) 100%);
+            color: var(--mu-white);
+            transition: all 0.25s ease;
+        }
+        .btn-mu-primary:hover {
+            filter: brightness(1.12);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(218, 41, 28, 0.5);
+        }
+
+        /* ตกแต่ง Scrollbar ด้านข้างให้เข้ากับธีม */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--mu-black);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--mu-red);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--mu-dark-red);
+        }
+
+        /* แอนิเมชันหน้าต่างอ่านเพิ่มเติม (Modal) */
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.95) translateY(12px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-modal {
+            animation: modalPop 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* คลาสซ่อนการ์ดนักเตะเวลาเลือกกรองตำแหน่ง */
+        .player-hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-[#DA291C] selection:text-white">
+
+    <!-- =========================================================================
+         1. แถบเมนูนำทางด้านบน (STICKY GLASSMORPHISM NAVBAR)
+         ========================================================================= -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-[#121212]/90 backdrop-blur-md border-b border-white/10 shadow-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- โลโก้สโมสร -->
+                <a href="#home" class="flex items-center gap-3 group">
+                    <div class="w-11 h-11 rounded-full bg-gradient-to-br from-[#DA291C] to-[#9E1B12] flex items-center justify-center border-2 border-[#FBE122] shadow-md group-hover:scale-105 transition-transform">
+                        <i class="fa-solid fa-shield-halved text-[#FBE122] text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-display text-xl sm:text-2xl font-bold tracking-wider text-white block leading-none">
+                            MANCHESTER <span class="text-[#DA291C]">UNITED</span>
+                        </span>
+                        <span class="text-[11px] text-[#FBE122] tracking-widest uppercase font-semibold">
+                            The Red Devils • Est. 1878
+                        </span>
+                    </div>
+                </a>
+
+                <!-- เมนูสำหรับหน้าจอคอมพิวเตอร์ (Desktop Menu) -->
+                <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
+                    <a href="#home" class="px-3.5 py-2 rounded-lg text-sm font-medium text-gray-200 hover:text-white hover:bg-white/10 transition">หน้าแรก</a>
+                    <a href="#history" class="px-3.5 py-2 rounded-lg text-sm font-medium text-gray-200 hover:text-white hover:bg-white/10 transition">ประวัติสโมสร</a>
+                    <a href="#trophies" class="px-3.5 py-2 rounded-lg text-sm font-medium text-gray-200 hover:text-white hover:bg-white/10 transition">ผลงานและความสำเร็จ</a>
+                    <a href="#squad" class="px-3.5 py-2 rounded-lg text-sm font-medium text-gray-200 hover:text-white hover:bg-white/10 transition">รายชื่อผู้เล่น</a>
+                    <a href="#developer" class="ml-2 px-4 py-2.5 rounded-lg text-sm font-semibold btn-mu-primary shadow-md flex items-center gap-2">
+                        <i class="fa-solid fa-user-tie"></i> ติดต่อผู้พัฒนา
+                    </a>
+                </nav>
+
+                <!-- ปุ่มเปิดเมนูสำหรับมือถือ (Mobile Hamburger Button) -->
+                <button id="mobile-menu-btn" type="button" class="md:hidden p-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 focus:outline-none" aria-label="เปิดเมนู">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- เมนูแบบเลื่อนลงสำหรับมือถือ (Mobile Dropdown) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-[#1E1E1E] border-b border-white/10 px-4 pt-2 pb-5 space-y-1">
+            <a href="#home" class="mobile-nav-link block px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-[#DA291C]">หน้าแรก (Home)</a>
+            <a href="#history" class="mobile-nav-link block px-4 py-3 rounded-lg text-base font-medium text-gray-200 hover:bg-[#DA291C] hover:text-white">ประวัติสโมสร (Club History)</a>
+            <a href="#trophies" class="mobile-nav-link block px-4 py-3 rounded-lg text-base font-medium text-gray-200 hover:bg-[#DA291C] hover:text-white">ผลงานและความสำเร็จ (Trophies)</a>
+            <a href="#squad" class="mobile-nav-link block px-4 py-3 rounded-lg text-base font-medium text-gray-200 hover:bg-[#DA291C] hover:text-white">รายชื่อผู้เล่น (Squad)</a>
+            <a href="#developer" class="mobile-nav-link block px-4 py-3 rounded-lg text-base font-semibold bg-[#DA291C] text-white mt-2">ติดต่อผู้พัฒนา (Developer Contact)</a>
+        </div>
+    </header>
+
+    <!-- =========================================================================
+         2. ส่วนแบนเนอร์หลักต้อนรับ (HERO SECTION)
+         วิธีเปลี่ยนรูปพื้นหลัง: นำลิงก์รูปภาพใหม่มาวางแทนที่ URL ใน style="background-image: url('...')"
+         ========================================================================= -->
+    <section id="home" class="relative min-h-[92vh] flex items-center justify-center pt-20 overflow-hidden">
+        <!-- ภาพพื้นหลังสนามโอลด์แทรฟฟอร์ด -->
+        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+             style="background-image: url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2070&auto=format&fit=crop');">
+        </div>
+        
+        <!-- เลเยอร์ไล่สีดำ-แดงทับภาพพื้นหลังเพื่อให้อ่านข้อความง่าย -->
+        <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/75 to-[#9E1B12]/45"></div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#DA291C]/90 border border-[#FBE122]/50 text-white text-xs sm:text-sm font-semibold tracking-wider uppercase mb-6 shadow-lg">
+                <i class="fa-solid fa-fire text-[#FBE122]"></i>
+                <span>Old Trafford • โรงละครแห่งความฝัน (Theatre of Dreams)</span>
+            </div>
+
+            <h1 class="font-display text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white uppercase drop-shadow-lg mb-4 leading-tight">
+                GLORY GLORY <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#DA291C] via-red-500 to-[#FBE122]">
+                    MANCHESTER UNITED
+                </span>
+            </h1>
+
+            <p class="text-gray-200 text-base sm:text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed mb-8">
+                สโมสรฟุตบอลระดับตำนานแห่งเกาะอังกฤษ ก่อตั้งขึ้นในปี ค.ศ. 1878 
+                รวบรวมเรื่องราวประวัติศาสตร์ ผลงานเกียรติยศ และขุนพลปีศาจแดงไว้ในที่เดียว
+            </p>
+
+            <!-- ปุ่มกดนำทาง -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="#history" class="w-full sm:w-auto px-8 py-4 rounded-xl btn-mu-primary font-semibold text-base flex items-center justify-center gap-2">
+                    <span>สำรวจประวัติสโมสร</span>
+                    <i class="fa-solid fa-arrow-down"></i>
+                </a>
+                <a href="#squad" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 text-white font-semibold text-base transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-users text-[#FBE122]"></i>
+                    <span>รายชื่อผู้เล่นชุดปัจจุบัน</span>
+                </a>
+            </div>
+
+            <!-- แถบสถิติสำคัญของสโมสร -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-14 pt-8 border-t border-white/15 max-w-4xl mx-auto">
+                <div class="text-center">
+                    <div class="font-display text-3xl sm:text-4xl font-bold text-[#FBE122]">1878</div>
+                    <div class="text-xs sm:text-sm text-gray-300 mt-1">ปีที่ก่อตั้งสโมสร</div>
+                </div>
+                <div class="text-center">
+                    <div class="font-display text-3xl sm:text-4xl font-bold text-white">20</div>
+                    <div class="text-xs sm:text-sm text-gray-300 mt-1">แชมป์ลีกสูงสุดอังกฤษ</div>
+                </div>
+                <div class="text-center">
+                    <div class="font-display text-3xl sm:text-4xl font-bold text-[#FBE122]">3</div>
+                    <div class="text-xs sm:text-sm text-gray-300 mt-1">แชมป์ยุโรป (UCL)</div>
+                </div>
+                <div class="text-center">
+                    <div class="font-display text-3xl sm:text-4xl font-bold text-white">68+</div>
+                    <div class="text-xs sm:text-sm text-gray-300 mt-1">ถ้วยรางวัลสำคัญทั้งหมด</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         3. ส่วนประวัติการก่อตั้งทีม (CLUB HISTORY)
+         แต่ละการ์ดมีปุ่ม "อ่านเพิ่มเติม" ที่สามารถคลิกเปิดหน้าต่าง Pop-up อ่านเนื้อหาเจาะลึกได้
+         ========================================================================= -->
+    <section id="history" class="py-20 bg-[#181818] border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-[#DA291C] font-bold tracking-widest uppercase text-sm">Club History & Heritage</span>
+                <h2 class="font-display text-3xl sm:text-5xl font-bold text-white mt-2 uppercase">
+                    ประวัติการก่อตั้งสโมสร
+                </h2>
+                <div class="w-24 h-1.5 bg-gradient-to-r from-[#DA291C] to-[#FBE122] mx-auto mt-4 rounded-full"></div>
+                <p class="text-gray-400 mt-4 text-sm sm:text-base">
+                    เส้นทางจากทีมฟุตบอลของพนักงานการรถไฟ สู่สโมสรฟุตบอลที่ยิ่งใหญ่ที่สุดแห่งหนึ่งของโลก
+                </p>
+            </div>
+
+            <!-- กริดการ์ดประวัติศาสตร์ 4 ยุคสมัย -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <!-- ยุคที่ 1 -->
+                <article class="mu-card rounded-2xl overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="relative h-56 overflow-hidden">
+                            <!-- วิธีเปลี่ยนรูปภาพประวัติศาสตร์: แก้ไขลิงก์ใน src="..." -->
+                            <img src="https://images.unsplash.com/photo-1518091043644-c1d4457512c6?q=80&w=1000&auto=format&fit=crop" 
+                                 onerror="this.src='https://placehold.co/800x450/1E1E1E/FBE122?text=Newton+Heath+1878'"
+                                 alt="จุดเริ่มต้น Newton Heath 1878" class="w-full h-full object-cover">
+                            <div class="absolute top-4 left-4 bg-[#DA291C] text-white font-display font-bold px-3.5 py-1 rounded-lg text-sm shadow">
+                                ค.ศ. 1878 - 1902
+                            </div>
+                        </div>
+                        <div class="p-6 sm:p-8">
+                            <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">
+                                จาก "นิวตัน ฮีธ" สู่ชื่อ "แมนเชสเตอร์ ยูไนเต็ด"
+                            </h3>
+                            <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+                                ก่อตั้งในปี ค.ศ. 1878 ในชื่อ <strong class="text-[#FBE122]">Newton Heath LYR Football Club</strong> โดยแผนกตู้โดยสารและเกวียนของบริษัทรถไฟ Lancashire and Yorkshire Railway ต่อมาในปี 1902 สโมสรประสบปัญหาทางการเงินและได้รับการกอบกู้โดย จอห์น เฮนรี เดวีส์ พร้อมเปลี่ยนชื่อเป็น "แมนเชสเตอร์ ยูไนเต็ด" และใช้สีแดง-ขาวเป็นสีประจำทีม
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-6 sm:px-8 pb-6">
+                        <button onclick="openModal('history_1878')" 
+                                class="inline-flex items-center gap-2 text-[#FBE122] hover:text-white font-semibold text-sm group transition cursor-pointer">
+                            <span>อ่านเพิ่มเติม (ประวัติยุคก่อตั้ง 1878)</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    </div>
+                </article>
+
+                <!-- ยุคที่ 2 -->
+                <article class="mu-card rounded-2xl overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1000&auto=format&fit=crop" 
+                                 onerror="this.src='https://placehold.co/800x450/1E1E1E/FBE122?text=Sir+Matt+Busby+Era'"
+                                 alt="ยุคเซอร์ แมตต์ บัสบี" class="w-full h-full object-cover">
+                            <div class="absolute top-4 left-4 bg-[#DA291C] text-white font-display font-bold px-3.5 py-1 rounded-lg text-sm shadow">
+                                ค.ศ. 1945 - 1969
+                            </div>
+                        </div>
+                        <div class="p-6 sm:p-8">
+                            <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">
+                                เซอร์ แมตต์ บัสบี, Busby Babes และแชมป์ยุโรปสมัยแรก
+                            </h3>
+                            <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+                                หลังสงครามโลกครั้งที่ 2 <strong class="text-[#FBE122]">เซอร์ แมตต์ บัสบี</strong> เข้ามาปฏิวัติทีมด้วยการปั้นนักเตะดาวรุ่งชุด "Busby Babes" แม้จะเกิดโศกนาฏกรรมเครื่องบินตกที่มิวนิกในปี 1958 แต่สโมสรก็ลุกขึ้นสู้ใหม่จนคว้าแชมป์ยูโรเปียน คัพ (UCL) ได้เป็นทีมแรกของอังกฤษในปี 1968
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-6 sm:px-8 pb-6">
+                        <button onclick="openModal('history_busby')" 
+                                class="inline-flex items-center gap-2 text-[#FBE122] hover:text-white font-semibold text-sm group transition cursor-pointer">
+                            <span>อ่านเพิ่มเติม (ยุค Busby Babes และมิวนิก 1958)</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    </div>
+                </article>
+
+                <!-- ยุคที่ 3 -->
+                <article class="mu-card rounded-2xl overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1000&auto=format&fit=crop" 
+                                 onerror="this.src='https://placehold.co/800x450/1E1E1E/FBE122?text=Sir+Alex+Ferguson'"
+                                 alt="ยุคทอง เซอร์ อเล็กซ์ เฟอร์กูสัน" class="w-full h-full object-cover">
+                            <div class="absolute top-4 left-4 bg-[#DA291C] text-white font-display font-bold px-3.5 py-1 rounded-lg text-sm shadow">
+                                ค.ศ. 1986 - 2013
+                            </div>
+                        </div>
+                        <div class="p-6 sm:p-8">
+                            <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">
+                                ยุคทอง 26 ปีของ "เซอร์ อเล็กซ์ เฟอร์กูสัน"
+                            </h3>
+                            <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+                                <strong class="text-[#FBE122]">เซอร์ อเล็กซ์ เฟอร์กูสัน</strong> พาทีมครองความยิ่งใหญ่ในยุคพรีเมียร์ลีก คว้าแชมป์รวม 38 รายการ รวมถึงประวัติศาสตร์ "ทริปเปิลแชมป์" ในปี 1999 และปลุกปั้นตำนานอย่าง เอริค คันโตนา, เดวิด เบ็คแฮม, พอล สโคลส์, ไรอัน กิ๊กส์ และ คริสเตียโน โรนัลโด
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-6 sm:px-8 pb-6">
+                        <button onclick="openModal('history_fergie')" 
+                                class="inline-flex items-center gap-2 text-[#FBE122] hover:text-white font-semibold text-sm group transition cursor-pointer">
+                            <span>อ่านเพิ่มเติม (ยุคทองของเซอร์ อเล็กซ์ เฟอร์กูสัน)</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    </div>
+                </article>
+
+                <!-- ยุคที่ 4 -->
+                <article class="mu-card rounded-2xl overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80&w=1000&auto=format&fit=crop" 
+                                 onerror="this.src='https://placehold.co/800x450/1E1E1E/FBE122?text=Old+Trafford+Modern+Era'"
+                                 alt="ยุคปัจจุบัน โอลด์แทรฟฟอร์ด" class="w-full h-full object-cover">
+                            <div class="absolute top-4 left-4 bg-[#DA291C] text-white font-display font-bold px-3.5 py-1 rounded-lg text-sm shadow">
+                                ค.ศ. 2013 - ปัจจุบัน
+                            </div>
+                        </div>
+                        <div class="p-6 sm:p-8">
+                            <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">
+                                ยุคสมัยใหม่และการสร้างทีมแห่งอนาคต
+                            </h3>
+                            <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+                                แม้จะผ่านช่วงเวลาแห่งการเปลี่ยนผ่านหลังการวางมือของเฟอร์กูสัน แต่แมนเชสเตอร์ ยูไนเต็ด ยังคงเดินหน้าคว้าแชมป์สำคัญ อาทิ <strong class="text-[#FBE122]">ยูฟ่า ยูโรปาลีก (2017)</strong>, เอฟเอ คัพ (2016, 2024) และคาราบาว คัพ (2017, 2023) พร้อมผลักดันดาวรุ่งสายเลือดใหม่สู่ทีมชุดใหญ่
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-6 sm:px-8 pb-6">
+                        <button onclick="openModal('history_modern')" 
+                                class="inline-flex items-center gap-2 text-[#FBE122] hover:text-white font-semibold text-sm group transition cursor-pointer">
+                            <span>อ่านเพิ่มเติม (ทิศทางสโมสรในยุคปัจจุบัน)</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    </div>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         4. ส่วนผลงานตั้งแต่อดีตจนถึงปัจจุบัน (TROPHIES & ACHIEVEMENTS)
+         ========================================================================= -->
+    <section id="trophies" class="py-20 bg-[#121212] border-t border-white/5 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-[#DA291C] font-bold tracking-widest uppercase text-sm">Honours & Trophy Cabinet</span>
+                <h2 class="font-display text-3xl sm:text-5xl font-bold text-white mt-2 uppercase">
+                    ผลงานตั้งแต่อดีตจนถึงปัจจุบัน
+                </h2>
+                <div class="w-24 h-1.5 bg-gradient-to-r from-[#DA291C] to-[#FBE122] mx-auto mt-4 rounded-full"></div>
+                <p class="text-gray-400 mt-4 text-sm sm:text-base">
+                    ตู้โชว์เกียรติยศของสโมสรที่ประสบความสำเร็จมากที่สุดทีมหนึ่งในประวัติศาสตร์ฟุตบอลอังกฤษ
+                </p>
+            </div>
+
+            <!-- กริดถ้วยรางวัลหลัก 6 รายการ -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                
+                <!-- ถ้วย 1: ลีกสูงสุด -->
+                <div class="mu-card rounded-2xl p-6 text-center flex flex-col justify-between">
+                    <div>
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-[#DA291C]/20 border border-[#DA291C] flex items-center justify-center text-[#FBE122] text-3xl mb-4">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <div class="font-display text-5xl font-bold text-[#FBE122] mb-1">20</div>
+                        <h3 class="text-lg font-bold text-white mb-2">แชมป์ลีกสูงสุดอังกฤษ (Premier League / First Division)</h3>
+                        <p class="text-gray-400 text-xs sm:text-sm mb-4">
+                            ครองสถิติแชมป์ลีกสูงสุดของอังกฤษมากที่สุดร่วม (1908, 1911, 1952, 1956, 1957, 1965, 1967, 1993–2013)
+                        </p>
+                    </div>
+                    <button onclick="openModal('trophy_league')" class="text-xs font-semibold text-[#FBE122] hover:text-white inline-flex items-center justify-center gap-1.5 pt-3 border-t border-white/10">
+                        <span>อ่านเพิ่มเติมสถิติแชมป์ลีก</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+
+                <!-- ถ้วย 2: ยูฟ่า แชมเปียนส์ลีก -->
+                <div class="mu-card rounded-2xl p-6 text-center flex flex-col justify-between">
+                    <div>
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-[#DA291C]/20 border border-[#DA291C] flex items-center justify-center text-[#FBE122] text-3xl mb-4">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        <div class="font-display text-5xl font-bold text-[#FBE122] mb-1">3</div>
+                        <h3 class="text-lg font-bold text-white mb-2">ยูฟ่า แชมเปียนส์ลีก / ยูโรเปียน คัพ (UEFA Champions League)</h3>
+                        <p class="text-gray-400 text-xs sm:text-sm mb-4">
+                            เจ้ายุโรป 3 สมัยอันยิ่งใหญ่ ในปี 1968 (เวมบลีย์), 1999 (คัมป์นู) และ 2008 (มอสโก)
+                        </p>
+                    </div>
+                    <button onclick="openModal('trophy_ucl')" class="text-xs font-semibold text-[#FBE122] hover:text-white inline-flex items-center justify-center gap-1.5 pt-3 border-t border-white/10">
+                        <span>อ่านเพิ่มเติมค่ำคืนแห่งประวัติศาสตร์</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+
+                <!-- ถ้วย 3: เอฟเอ คัพ -->
+                <div class="mu-card rounded-2xl p-6 text-center flex flex-col justify-between">
+                    <div>
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-[#DA291C]/20 border border-[#DA291C] flex items-center justify-center text-[#FBE122] text-3xl mb-4">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <div class="font-display text-5xl font-bold text-[#FBE122] mb-1">13</div>
+                        <h3 class="text-lg font-bold text-white mb-2">เอฟเอ คัพ (Emirates FA Cup)</h3>
+                        <p class="text-gray-400 text-xs sm:text-sm mb-4">
+                            ถ้วยฟุตบอลที่เก่าแก่ที่สุดในโลก คว้าแชมป์ล่าสุดในปี 2024 ด้วยการเอาชนะแมนเชสเตอร์ ซิตี้ 2-1
+                        </p>
+                    </div>
+                    <button onclick="openModal('trophy_fa')" class="text-xs font-semibold text-[#FBE122] hover:text-white inline-flex items-center justify-center gap-1.5 pt-3 border-t border-white/10">
+                        <span>อ่านเพิ่มเติมทำเนียบแชมป์ FA Cup</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+
+                <!-- ถ้วย 4: ลีกคัพ -->
+                <div class="mu-card rounded-2xl p-6 text-center flex flex-col justify-between">
+                    <div>
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-[#DA291C]/20 border border-[#DA291C] flex items-center justify-center text-[#FBE122] text-3xl mb-4">
+                            <i class="fa-solid fa-medal"></i>
+                        </div>
+                        <div class="font-display text-5xl font-bold text-[#FBE122] mb-1">6</div>
+                        <h3 class="text-lg font-bold text-white mb-2">อีเอฟแอล คัพ / คาราบาว คัพ (League Cup)</h3>
+                        <p class="text-gray-400 text-xs sm:text-sm mb-4">
+                            คว้าแชมป์ในปี 1992, 2006, 2009, 2010, 2017 และ 2023 ณ สนามเวมบลีย์
+                        </p>
+                    </div>
+                    <button onclick="openModal('trophy_efl')" class="text-xs font-semibold text-[#FBE122] hover:text-white inline-flex items-center justify-center gap-1.5 pt-3 border-t border-white/10">
+                        <span>อ่านเพิ่มเติมรายละเอียด</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+
+                <!-- ถ้วย 5: ยูโรปาลีก & ถ้วยยุโรปอื่นๆ -->
+                <div class="mu-card rounded-2xl p-6 text-center flex flex-col justify-between">
+                    <div>
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-[#DA291C]/20 border border-[#DA291C] flex items-center justify-center text-[#FBE122] text-3xl mb-4">
+                            <i class="fa-solid fa-earth-europe"></i>
+                        </div>
+                        <div class="font-display text-5xl font-bold text-[#FBE122] mb-1">3</div>
+                        <h3 class="text-lg font-bold text-white mb-2">ยูโรปาลีก / คัพ วินเนอร์ส คัพ / ซูเปอร์คัพ</h3>
+                        <p class="text-gray-400 text-xs sm:text-sm mb-4">
+                            แชมป์ยูฟ่า ยูโรปาลีก (2017), ยูโรเปียน คัพ วินเนอร์ส คัพ (1991) และ ยูฟ่า ซูเปอร์คัพ (1991)
+                        </p>
+                    </div>
+                    <button onclick="openModal('trophy_europa')" class="text-xs font-semibold text-[#FBE122] hover:text-white inline-flex items-center justify-center gap-1.5 pt-3 border-t border-white/10">
+                        <span>อ่านเพิ่มเติมเกียรติยศยุโรป</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+
+                <!-- ถ้วย 6: แชมป์สโมสรโลก & คอมมิวนิตี ชิลด์ -->
+                <div class="mu-card rounded-2xl p-6 text-center flex flex-col justify-between">
+                    <div>
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-[#DA291C]/20 border border-[#DA291C] flex items-center justify-center text-[#FBE122] text-3xl mb-4">
+                            <i class="fa-solid fa-globe"></i>
+                        </div>
+                        <div class="font-display text-5xl font-bold text-[#FBE122] mb-1">23</div>
+                        <h3 class="text-lg font-bold text-white mb-2">แชมป์สโมสรโลก (2) & คอมมิวนิตี ชิลด์ (21)</h3>
+                        <p class="text-gray-400 text-xs sm:text-sm mb-4">
+                            แชมป์สโมสรโลก FIFA Club World Cup (2008), อินเตอร์คอนติเนนตัล คัพ (1999) และคอมมิวนิตี ชิลด์ 21 สมัย
+                        </p>
+                    </div>
+                    <button onclick="openModal('trophy_world')" class="text-xs font-semibold text-[#FBE122] hover:text-white inline-flex items-center justify-center gap-1.5 pt-3 border-t border-white/10">
+                        <span>อ่านเพิ่มเติมแชมป์ระดับโลก</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- แบนเนอร์ไฮไลต์พิเศษ: ทริปเปิลแชมป์ 1999 -->
+            <div class="rounded-2xl bg-gradient-to-r from-[#9E1B12] via-[#DA291C] to-[#9E1B12] p-6 sm:p-10 shadow-2xl border border-[#FBE122]/40 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="text-center md:text-left">
+                    <span class="inline-block px-3 py-1 rounded-full bg-black/30 text-[#FBE122] text-xs font-bold uppercase tracking-wider mb-2">
+                        Historical Milestone • 1998/99
+                    </span>
+                    <h3 class="font-display text-2xl sm:text-3xl font-bold text-white uppercase">
+                        ตำนาน "ทริปเปิลแชมป์" แห่งประวัติศาสตร์ (The Treble 1999)
+                    </h3>
+                    <p class="text-white/90 text-sm sm:text-base mt-2 max-w-2xl">
+                        สโมสรแรกของอังกฤษที่คว้า 3 แชมป์ใหญ่ (พรีเมียร์ลีก, เอฟเอ คัพ และ ยูฟ่า แชมเปียนส์ลีก) ภายในฤดูกาลเดียวกัน พร้อมปาฏิหาริย์ 2 ประตูช่วงทดเวลาบาดเจ็บที่คัมป์นู
+                    </p>
+                </div>
+                <button onclick="openModal('treble_1999')" class="shrink-0 px-6 py-3.5 rounded-xl bg-[#121212] hover:bg-black text-[#FBE122] font-bold text-sm shadow-lg transition flex items-center gap-2 cursor-pointer">
+                    <span>อ่านเรื่องราวทริปเปิลแชมป์</span>
+                    <i class="fa-solid fa-book-open"></i>
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         5. ส่วนรายชื่อผู้เล่น (FIRST TEAM SQUAD)
+         วิธีเพิ่มนักเตะใหม่ในโค้ด:
+         1. ก๊อปปี้บล็อก <div class="player-card ..."> 1 ชุด
+         2. เปลี่ยน data-position เป็น "GK", "DEF", "MID" หรือ "FWD"
+         3. เปลี่ยนรูปภาพที่ src="..." และแก้ไขชื่อ เบอร์เสื้อ ตำแหน่ง
+         4. เพิ่มข้อมูลในตัวแปร modalContents ด้านล่างสุดของไฟล์ (ในแท็ก <script>)
+         ========================================================================= -->
+    <section id="squad" class="py-20 bg-[#181818] border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <span class="text-[#DA291C] font-bold tracking-widest uppercase text-sm">The Red Devils Squad</span>
+                <h2 class="font-display text-3xl sm:text-5xl font-bold text-white mt-2 uppercase">
+                    รายชื่อผู้เล่นทีมชุดใหญ่
+                </h2>
+                <div class="w-24 h-1.5 bg-gradient-to-r from-[#DA291C] to-[#FBE122] mx-auto mt-4 rounded-full"></div>
+                <p class="text-gray-400 mt-4 text-sm sm:text-base">
+                    คลิกเลือกกรองตามตำแหน่ง หรือกด <strong class="text-[#FBE122]">"อ่านประวัติผู้เล่น"</strong> เพื่อดูข้อมูลเชิงลึกของนักเตะแต่ละคน
+                </p>
+            </div>
+
+            <!-- ปุ่มกรองตำแหน่งผู้เล่น (Filter Buttons) -->
+            <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-12" id="filter-buttons">
+                <button onclick="filterSquad('all', this)" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-[#DA291C] text-white shadow-md transition">
+                    ทั้งหมด (All)
+                </button>
+                <button onclick="filterSquad('GK', this)" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-[#1E1E1E] text-gray-300 hover:bg-[#DA291C]/80 hover:text-white border border-white/10 transition">
+                    ผู้รักษาประตู (GK)
+                </button>
+                <button onclick="filterSquad('DEF', this)" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-[#1E1E1E] text-gray-300 hover:bg-[#DA291C]/80 hover:text-white border border-white/10 transition">
+                    กองหลัง (DEF)
+                </button>
+                <button onclick="filterSquad('MID', this)" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-[#1E1E1E] text-gray-300 hover:bg-[#DA291C]/80 hover:text-white border border-white/10 transition">
+                    กองกลาง (MID)
+                </button>
+                <button onclick="filterSquad('FWD', this)" class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-[#1E1E1E] text-gray-300 hover:bg-[#DA291C]/80 hover:text-white border border-white/10 transition">
+                    กองหน้า (FWD)
+                </button>
+            </div>
+
+            <!-- กริดแสดงการ์ดรายชื่อนักเตะ -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="squad-grid">
+
+                <!-- ผู้เล่น 1: Bruno Fernandes (MID) -->
+                <div class="player-card mu-card rounded-2xl overflow-hidden flex flex-col justify-between" data-position="MID">
+                    <div>
+                        <div class="relative h-64 bg-gradient-to-b from-[#9E1B12]/40 to-[#121212] overflow-hidden">
+                            <!-- วิธีเปลี่ยนรูปนักเตะ: แก้ไขลิงก์รูปภาพใน src="..." -->
+                            <img src="https://placehold.co/500x600/1E1E1E/FFFFFF?text=%238+Bruno+Fernandes" 
+                                 alt="Bruno Fernandes" class="w-full h-full object-cover object-top">
+                            <span class="absolute top-3 right-3 font-display text-3xl font-bold text-[#FBE122] drop-shadow-md">#8</span>
+                            <span class="absolute bottom-3 left-3 px-2.5 py-1 rounded bg-[#DA291C] text-white text-xs font-bold">กองกลาง (กัปตันทีม)</span>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-white">บรูโน แฟร์นันด์ส</h3>
+                            <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Bruno Fernandes • โปรตุเกส</p>
+                            <p class="text-gray-300 text-xs leading-relaxed">
+                                กัปตันทีมและจอมทัพตัวสร้างสรรค์เกม โดดเด่นเรื่องการจ่ายบอลทะลุช่องและการยิงไกลที่เฉียบคม
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5">
+                        <button onclick="openModal('player_bruno')" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-[#DA291C] text-[#FBE122] hover:text-white text-xs font-semibold transition flex items-center justify-center gap-2">
+                            <span>อ่านประวัติผู้เล่น</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ผู้เล่น 2: Kobbie Mainoo (MID) -->
+                <div class="player-card mu-card rounded-2xl overflow-hidden flex flex-col justify-between" data-position="MID">
+                    <div>
+                        <div class="relative h-64 bg-gradient-to-b from-[#9E1B12]/40 to-[#121212] overflow-hidden">
+                            <img src="https://placehold.co/500x600/1E1E1E/FFFFFF?text=%2337+Kobbie+Mainoo" 
+                                 alt="Kobbie Mainoo" class="w-full h-full object-cover object-top">
+                            <span class="absolute top-3 right-3 font-display text-3xl font-bold text-[#FBE122] drop-shadow-md">#37</span>
+                            <span class="absolute bottom-3 left-3 px-2.5 py-1 rounded bg-[#DA291C] text-white text-xs font-bold">กองกลาง</span>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-white">ค็อบบี ไมนู</h3>
+                            <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Kobbie Mainoo • อังกฤษ</p>
+                            <p class="text-gray-300 text-xs leading-relaxed">
+                                ผลผลิตจากอะคาเดมีแมนยูผู้เยือกเย็นเกินวัย ครองบอลเหนียวแน่นและเป็นฮีโร่ผู้ทำประตูชัยนัดชิง FA Cup 2024
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5">
+                        <button onclick="openModal('player_mainoo')" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-[#DA291C] text-[#FBE122] hover:text-white text-xs font-semibold transition flex items-center justify-center gap-2">
+                            <span>อ่านประวัติผู้เล่น</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ผู้เล่น 3: Alejandro Garnacho (FWD) -->
+                <div class="player-card mu-card rounded-2xl overflow-hidden flex flex-col justify-between" data-position="FWD">
+                    <div>
+                        <div class="relative h-64 bg-gradient-to-b from-[#9E1B12]/40 to-[#121212] overflow-hidden">
+                            <img src="https://placehold.co/500x600/1E1E1E/FFFFFF?text=%2317+Garnacho" 
+                                 alt="Alejandro Garnacho" class="w-full h-full object-cover object-top">
+                            <span class="absolute top-3 right-3 font-display text-3xl font-bold text-[#FBE122] drop-shadow-md">#17</span>
+                            <span class="absolute bottom-3 left-3 px-2.5 py-1 rounded bg-[#DA291C] text-white text-xs font-bold">กองหน้า / ปีก</span>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-white">อเลฮานโดร การ์นาโช</h3>
+                            <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Alejandro Garnacho • อาร์เจนตินา</p>
+                            <p class="text-gray-300 text-xs leading-relaxed">
+                                ปีกดาวรุ่งความเร็วสูง เจ้าของรางวัลประตูยอดเยี่ยมแห่งปี FIFA Puskás Award 2024 จากลูกจักรยานอากาศ
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5">
+                        <button onclick="openModal('player_garnacho')" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-[#DA291C] text-[#FBE122] hover:text-white text-xs font-semibold transition flex items-center justify-center gap-2">
+                            <span>อ่านประวัติผู้เล่น</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ผู้เล่น 4: Rasmus Højlund (FWD) -->
+                <div class="player-card mu-card rounded-2xl overflow-hidden flex flex-col justify-between" data-position="FWD">
+                    <div>
+                        <div class="relative h-64 bg-gradient-to-b from-[#9E1B12]/40 to-[#121212] overflow-hidden">
+                            <img src="https://placehold.co/500x600/1E1E1E/FFFFFF?text=%239+Rasmus+Hojlund" 
+                                 alt="Rasmus Højlund" class="w-full h-full object-cover object-top">
+                            <span class="absolute top-3 right-3 font-display text-3xl font-bold text-[#FBE122] drop-shadow-md">#9</span>
+                            <span class="absolute bottom-3 left-3 px-2.5 py-1 rounded bg-[#DA291C] text-white text-xs font-bold">กองหน้าตัวเป้า</span>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-white">ราสมุส ฮอยลุนด์</h3>
+                            <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Rasmus Højlund • เดนมาร์ก</p>
+                            <p class="text-gray-300 text-xs leading-relaxed">
+                                ศูนย์หน้าเจ้าของเสื้อหมายเลข 9 ผู้เปี่ยมด้วยพละกำลัง ความเร็ว และการจบสกอร์ที่เฉียบคมในกรอบเขตโทษ
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5">
+                        <button onclick="openModal('player_hojlund')" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-[#DA291C] text-[#FBE122] hover:text-white text-xs font-semibold transition flex items-center justify-center gap-2">
+                            <span>อ่านประวัติผู้เล่น</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ผู้เล่น 5: Marcus Rashford (FWD) -->
+                <div class="player-card mu-card rounded-2xl overflow-hidden flex flex-col justify-between" data-position="FWD">
+                    <div>
+                        <div class="relative h-64 bg-gradient-to-b from-[#9E1B12]/40 to-[#121212] overflow-hidden">
+                            <img src="https://placehold.co/500x600/1E1E1E/FFFFFF?text=%2310+Marcus+Rashford" 
+                                 alt="Marcus Rashford" class="w-full h-full object-cover object-top">
+                            <span class="absolute top-3 right-3 font-display text-3xl font-bold text-[#FBE122] drop-shadow-md">#10</span>
+                            <span class="absolute bottom-3 left-3 px-2.5 py-1 rounded bg-[#DA291C] text-white text-xs font-bold">กองหน้า / ปีกซ้าย</span>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-white">มาร์คัส แรชฟอร์ด</h3>
+                            <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Marcus Rashford • อังกฤษ</p>
+                            <p class="text-gray-300 text-xs leading-relaxed">
+                                ลูกหม้อของสโมสรที่เติบโตจากอะคาเดมีตั้งแต่อายุ 7 ขวบ ยิงประตูให้ทีมชุดใหญ่ทะลุ 130 ประตู
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5">
+                        <button onclick="openModal('player_rashford')" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-[#DA291C] text-[#FBE122] hover:text-white text-xs font-semibold transition flex items-center justify-center gap-2">
+                            <span>อ่านประวัติผู้เล่น</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ผู้เล่น 6: Lisandro Martínez (DEF) -->
+                <div class="player-card mu-card rounded-2xl overflow-hidden flex flex-col justify-between" data-position="DEF">
+                    <div>
+                        <div class="relative h-64 bg-gradient-to-b from-[#9E1B12]/40 to-[#121212] overflow-hidden">
+                            <img src="https://placehold.co/500x600/1E1E1E/FFFFFF?text=%236+Lisandro+Martinez" 
+                                 alt="Lisandro Martínez" class="w-full h-full object-cover object-top">
+                            <span class="absolute top-3 right-3 font-display text-3xl font-bold text-[#FBE122] drop-shadow-md">#6</span>
+                            <span class="absolute bottom-3 left-3 px-2.5 py-1 rounded bg-[#DA291C] text-white text-xs font-bold">กองหลัง</span>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-white">ลิซานโดร มาร์ติเนซ</h3>
+                            <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Lisandro Martínez • อาร์เจนตินา</p>
+                            <p class="text-gray-300 text-xs leading-relaxed">
+                                ปราการหลังแชมป์โลกผู้ดุดัน ฉายา "The Butcher" เข้าสกัดบอลแม่นยำและออกบอลจากแดนหลังได้อย่างยอดเยี่ยม
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5">
+                        <button onclick="openModal('player_martinez')" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-[#DA291C] text-[#FBE122] hover:text-white text-xs font-semibold transition flex items-center justify-center gap-2">
+                            <span>อ่านประวัติผู้เล่น</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ผู้เล่น 7: Matthijs de Ligt (DEF) -->
+                <div class="player-card mu-card rounded-2xl overflow-hidden flex flex-col justify-between" data-position="DEF">
+                    <div>
+                        <div class="relative h-64 bg-gradient-to-b from-[#9E1B12]/40 to-[#121212] overflow-hidden">
+                            <img src="https://placehold.co/500x600/1E1E1E/FFFFFF?text=%234+Matthijs+de+Ligt" 
+                                 alt="Matthijs de Ligt" class="w-full h-full object-cover object-top">
+                            <span class="absolute top-3 right-3 font-display text-3xl font-bold text-[#FBE122] drop-shadow-md">#4</span>
+                            <span class="absolute bottom-3 left-3 px-2.5 py-1 rounded bg-[#DA291C] text-white text-xs font-bold">กองหลัง</span>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-white">มัทไธส์ เดอ ลิกต์</h3>
+                            <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Matthijs de Ligt • เนเธอร์แลนด์</p>
+                            <p class="text-gray-300 text-xs leading-relaxed">
+                                เซ็นเตอร์แบ็กทีมชาติเนเธอร์แลนด์ที่มีความเป็นผู้นำสูง แข็งแกร่งในลูกกลางอากาศและอ่านเกมรับได้เฉียบขาด
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5">
+                        <button onclick="openModal('player_deligt')" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-[#DA291C] text-[#FBE122] hover:text-white text-xs font-semibold transition flex items-center justify-center gap-2">
+                            <span>อ่านประวัติผู้เล่น</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ผู้เล่น 8: André Onana (GK) -->
+                <div class="player-card mu-card rounded-2xl overflow-hidden flex flex-col justify-between" data-position="GK">
+                    <div>
+                        <div class="relative h-64 bg-gradient-to-b from-[#9E1B12]/40 to-[#121212] overflow-hidden">
+                            <img src="https://placehold.co/500x600/1E1E1E/FFFFFF?text=%2324+Andre+Onana" 
+                                 alt="André Onana" class="w-full h-full object-cover object-top">
+                            <span class="absolute top-3 right-3 font-display text-3xl font-bold text-[#FBE122] drop-shadow-md">#24</span>
+                            <span class="absolute bottom-3 left-3 px-2.5 py-1 rounded bg-[#DA291C] text-white text-xs font-bold">ผู้รักษาประตู</span>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-white">อ็องเดร โอนานา</h3>
+                            <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">André Onana • แคเมอรูน</p>
+                            <p class="text-gray-300 text-xs leading-relaxed">
+                                ผู้รักษาประตูมือหนึ่งของทีม มีปฏิกิริยาการเซฟที่รวดเร็วและทักษะการใช้เท้าเปิดเกมรุกที่ยอดเยี่ยม
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5">
+                        <button onclick="openModal('player_onana')" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-[#DA291C] text-[#FBE122] hover:text-white text-xs font-semibold transition flex items-center justify-center gap-2">
+                            <span>อ่านประวัติผู้เล่น</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- สามารถก๊อปปี้การ์ดผู้เล่นด้านบนมาวางต่อตรงนี้เพื่อเพิ่มรายชื่อผู้เล่นคนอื่นๆ ได้เลยครับ -->
+
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         6. ส่วนติดต่อผู้พัฒนาเว็บไซต์ (DEVELOPER CONTACT SECTION)
+         ข้อมูลผู้พัฒนา: คุณบุญยาพร จุมปา | Line ID: nanfa11
+         วิธีเปลี่ยนรูปโปรไฟล์ผู้พัฒนา: นำไฟล์รูปภาพหรือลิงก์รูปมาใส่แทนที่ src="..." ด้านล่าง
+         ========================================================================= -->
+    <section id="developer" class="py-20 bg-[#121212] border-t border-white/10 relative overflow-hidden">
+        <!-- แสงตกแต่งพื้นหลังโทนสีแดงแมนยู -->
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-[#DA291C]/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-[#DA291C] font-bold tracking-widest uppercase text-sm">Web Designer & Developer</span>
+                <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mt-2 uppercase">
+                    ติดต่อผู้พัฒนาเว็บไซต์
+                </h2>
+                <div class="w-20 h-1.5 bg-gradient-to-r from-[#DA291C] to-[#FBE122] mx-auto mt-3 rounded-full"></div>
+            </div>
+
+            <!-- การ์ดข้อมูลผู้พัฒนาเว็บไซต์ -->
+            <div class="mu-card rounded-3xl p-6 sm:p-10 border border-white/15 shadow-2xl">
+                <div class="flex flex-col md:flex-row items-center gap-8 sm:gap-10">
+                    
+                    <!-- ส่วนรูปภาพโปรไฟล์ผู้พัฒนา -->
+                    <div class="shrink-0 text-center">
+                        <div class="relative w-44 h-44 sm:w-52 sm:h-52 mx-auto rounded-full p-1.5 bg-gradient-to-tr from-[#DA291C] via-[#FBE122] to-[#9E1B12] shadow-xl">
+                            <!-- =====================================================================
+                                 [จุดเปลี่ยนรูปภาพผู้พัฒนา] 
+                                 คุณบุญยาพร จุมปา สามารถนำชื่อไฟล์รูป (เช่น "images/nanfa.jpg") 
+                                 หรือ URL รูปภาพ มาใส่แทนที่ลิงก์ใน src="..." บรรทัดล่างนี้ได้เลยครับ
+                                 ===================================================================== -->
+                            <img src="https://placehold.co/400x400/1E1E1E/FBE122?text=คุณบุญยาพร+จุมปา" 
+                                 onerror="this.src='https://placehold.co/400x400/1E1E1E/FFFFFF?text=Boonyaporn+J.'"
+                                 alt="คุณบุญยาพร จุมปา ผู้พัฒนาเว็บไซต์" 
+                                 class="w-full h-full object-cover rounded-full bg-[#121212]">
+                            
+                            <!-- ไอคอนสถานะผู้พัฒนา -->
+                            <div class="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#DA291C] border-2 border-[#121212] flex items-center justify-center text-white shadow-md" title="Web Developer">
+                                <i class="fa-solid fa-laptop-code text-sm"></i>
+                            </div>
+                        </div>
+                        <span class="inline-block mt-3 text-xs text-gray-400">
+                            <i class="fa-solid fa-camera text-[#FBE122] mr-1"></i> เปลี่ยนรูปภาพได้ที่แท็ก &lt;img&gt; ในโค้ด
+                        </span>
+                    </div>
+
+                    <!-- ส่วนรายละเอียดการติดต่อ -->
+                    <div class="flex-1 text-center md:text-left">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#DA291C]/20 border border-[#DA291C]/50 text-[#FBE122] text-xs font-semibold mb-3">
+                            <i class="fa-solid fa-star"></i>
+                            <span>ผู้พัฒนาและออกแบบเว็บไซต์ (Web Developer & UX/UI Designer)</span>
+                        </div>
+
+                        <h3 class="text-2xl sm:text-3xl font-bold text-white mb-2">
+                            คุณบุญยาพร จุมปา
+                        </h3>
+                        <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-6">
+                            ยินดีให้คำปรึกษา พัฒนาและออกแบบเว็บไซต์ด้วยภาษา HTML, CSS และเทคโนโลยีเว็บสมัยใหม่ 
+                            สามารถติดต่อสอบถาม พูดคุยแลกเปลี่ยนความคิดเห็น หรือติดต่องานได้ผ่านช่องทาง Line ด้านล่างนี้ครับ
+                        </p>
+
+                        <!-- กล่องแสดง Line ID พร้อมปุ่มคัดลอกและลิงก์เปิด Line -->
+                        <div class="bg-[#121212] border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-[#06C755] flex items-center justify-center text-white text-2xl shadow-md shrink-0">
+                                    <i class="fa-brands fa-line"></i>
+                                </div>
+                                <div class="text-left">
+                                    <span class="text-xs text-gray-400 block">ติดต่อทางแอปพลิเคชัน LINE</span>
+                                    <span class="text-lg sm:text-xl font-bold text-white tracking-wide">Line ID: <span class="text-[#06C755]" id="line-id-text">nanfa11</span></span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <!-- ปุ่มคัดลอก Line ID -->
+                                <button onclick="copyLineId()" id="copy-btn"
+                                        class="flex-1 sm:flex-initial px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition flex items-center justify-center gap-2 cursor-pointer">
+                                    <i class="fa-regular fa-copy"></i>
+                                    <span id="copy-btn-text">คัดลอก ID</span>
+                                </button>
+                                
+                                <!-- ปุ่มแอดไลน์โดยตรง -->
+                                <a href="https://line.me/ti/p/~nanfa11" target="_blank" rel="noopener noreferrer"
+                                   class="flex-1 sm:flex-initial px-5 py-3 rounded-xl bg-[#06C755] hover:bg-[#05b34c] text-white text-sm font-semibold shadow-lg transition flex items-center justify-center gap-2">
+                                    <i class="fa-brands fa-line text-lg"></i>
+                                    <span>แอดไลน์ทันที</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- แถบข้อความแจ้งเตือนเมื่อกดคัดลอก Line ID สำเร็จ -->
+                        <div id="copy-feedback" class="hidden mt-3 text-xs text-[#06C755] font-medium flex items-center justify-center md:justify-start gap-1.5">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>คัดลอก Line ID: nanfa11 เรียบร้อยแล้ว!</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         7. ส่วนท้ายเว็บไซต์ (FOOTER)
+         ========================================================================= -->
+    <footer class="bg-[#0B0B0B] border-t border-white/10 py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-shield-halved text-[#DA291C] text-2xl"></i>
+                <div>
+                    <span class="font-display font-bold text-white tracking-wider">MANCHESTER UNITED FAN SITE</span>
+                    <p class="text-xs text-gray-500">จัดทำขึ้นเพื่อรวบรวมข้อมูลประวัติศาสตร์ ผลงาน และรายชื่อผู้เล่นของสโมสร</p>
+                </div>
+            </div>
+            
+            <div class="text-xs sm:text-sm text-gray-400">
+                ออกแบบและพัฒนาโดย <strong class="text-white">คุณบุญยาพร จุมปา</strong> • Line ID: <span class="text-[#FBE122] font-semibold">nanfa11</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- =========================================================================
+         8. หน้าต่าง POP-UP อ่านเพิ่มเติม (READ MORE MODAL)
+         ใช้สำหรับแสดงเนื้อหาเจาะลึกเมื่อผู้ใช้คลิกปุ่ม "อ่านเพิ่มเติม" ในทุกส่วนของเว็บ
+         ========================================================================= -->
+    <div id="article-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-[#1E1E1E] border border-[#DA291C]/50 rounded-2xl max-w-2xl w-full max-h-[88vh] overflow-y-auto shadow-2xl animate-modal relative">
+            
+            <!-- ส่วนหัว Modal -->
+            <div class="sticky top-0 bg-[#1E1E1E]/95 backdrop-blur-md px-6 py-4 border-b border-white/10 flex items-center justify-between z-10">
+                <span id="modal-badge" class="px-3 py-1 rounded-full bg-[#DA291C] text-white text-xs font-bold uppercase tracking-wider">
+                    ข้อมูลเจาะลึก
+                </span>
+                <button onclick="closeModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#DA291C] text-white flex items-center justify-center transition cursor-pointer" aria-label="ปิดหน้าต่าง">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- เนื้อหาภายใน Modal -->
+            <div class="p-6 sm:p-8">
+                <h3 id="modal-title" class="text-2xl sm:text-3xl font-bold text-white mb-2">
+                    หัวข้อบทความ
+                </h3>
+                <p id="modal-subtitle" class="text-sm text-[#FBE122] font-medium mb-6">
+                    คำบรรยายย่อย
+                </p>
+                <div id="modal-body" class="text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
+                    <!-- เนื้อหาจะถูกดึงมาแสดงอัตโนมัติจาก JavaScript ด้านล่าง -->
+                </div>
+            </div>
+
+            <!-- ส่วนท้าย Modal -->
+            <div class="px-6 py-4 bg-[#121212] border-t border-white/10 flex justify-end">
+                <button onclick="closeModal()" class="px-6 py-2.5 rounded-xl btn-mu-primary text-sm font-semibold cursor-pointer">
+                    ปิดหน้าต่างนี้
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         9. ส่วนควบคุมการทำงาน (JAVASCRIPT)
+         วิธีเพิ่มเนื้อหาสำหรับปุ่ม "อ่านเพิ่มเติม": เพิ่มข้อมูลในตัวแปร modalDatabase ด้านล่าง
+         ========================================================================= -->
+    <script>
+        // 1. ฐานข้อมูลเนื้อหาสำหรับหน้าต่าง "อ่านเพิ่มเติม" (สามารถแก้ไขหรือเพิ่มหัวข้อใหม่ตรงนี้ได้เลย)
+        const modalDatabase = {
+            // --- หมวดประวัติสโมสร ---
+            history_1878: {
+                badge: "ประวัติสโมสร • ค.ศ. 1878 - 1902",
+                title: "จุดกำเนิดจาก Newton Heath สู่ แมนเชสเตอร์ ยูไนเต็ด",
+                subtitle: "รากฐานแห่งความมุ่งมั่นของกลุ่มคนงานการรถไฟเมืองแมนเชสเตอร์",
+                content: `
+                    <p>ในปี ค.ศ. 1878 พนักงานแผนกตู้โดยสารและเกวียนของบริษัทรถไฟ <strong>Lancashire and Yorkshire Railway</strong> ประจำสถานีนิวตัน ฮีธ ได้รวมตัวกันก่อตั้งทีมฟุตบอลในชื่อ <strong>Newton Heath LYR F.C.</strong> โดยสวมชุดแข่งขันสีเขียว-ทองลงทำการแข่งขันกับทีมแผนกอื่นและบริษัทรถไฟแห่งอื่น</p>
+                    <p>ต่อมาในปี 1892 สโมสรได้เข้าร่วมการแข่งขันฟุตบอลลีกอังกฤษ (Football League) เป็นครั้งแรก แต่ต้องเผชิญวิกฤตการเงินอย่างหนักในปี 1902 จนเกือบถูกสั่งปิดสโมสร</p>
+                    <p>จุดเปลี่ยนสำคัญเกิดขึ้นเมื่อ <strong>จอห์น เฮนรี เดวีส์ (John Henry Davies)</strong> นักธุรกิจโรงเบียร์ท้องถิ่นเข้ามาลงทุนปลดหนี้ให้สโมสร และในวันที่ 26 เมษายน ค.ศ. 1902 ได้มีการเปลี่ยนชื่อสโมสรอย่างเป็นทางการว่า <strong>"Manchester United Football Club"</strong> พร้อมเปลี่ยนสีชุดแข่งเป็น <strong>สีแดง-ขาว</strong> จนถึงปัจจุบัน</p>
+                `
+            },
+            history_busby: {
+                badge: "ประวัติสโมสร • ค.ศ. 1945 - 1969",
+                title: "เซอร์ แมตต์ บัสบี, Busby Babes และโศกนาฏกรรมมิวนิก",
+                subtitle: "จิตวิญญาณแห่งการไม่ยอมแพ้ที่หล่อหลอมสโมสรจนถึงทุกวันนี้",
+                content: `
+                    <p>หลังสิ้นสุดสงครามโลกครั้งที่ 2 <strong>เซอร์ แมตต์ บัสบี</strong> เข้ามารับตำแหน่งผู้จัดการทีมและวางรากฐานระบบเยาวชน จนเกิดทีมดาวรุ่งฝีเท้าจัดจ้านที่สื่อมวลชนเรียกว่า <strong>"Busby Babes"</strong> ซึ่งคว้าแชมป์ลีกสูงสุดได้ในฤดูกาล 1955–56 และ 1956–57</p>
+                    <p><strong>6 กุมภาพันธ์ ค.ศ. 1958:</strong> เกิดโศกนาฏกรรมเครื่องบินตกที่เมืองมิวนิก ประเทศเยอรมนี ขณะเดินทางกลับจากการแข่งขันยูโรเปียน คัพ ทำให้มีผู้เสียชีวิต 23 ราย รวมถึงนักเตะตัวหลักของทีมถึง 8 ราย</p>
+                    <p>แม้จะสูญเสียอย่างใหญ่หลวง แต่เซอร์ แมตต์ บัสบี ที่รอดชีวิตมาได้ ได้สร้างทีมขึ้นมาใหม่โดยมี <strong>เซอร์ บ็อบบี ชาร์ลตัน, จอร์จ เบสต์ และ เดนิส ลอว์</strong> เป็นแกนหลัก และสามารถคว้าแชมป์ยูโรเปียน คัพ สมัยแรกได้สำเร็จในปี 1968 ณ สนามเวมบลีย์</p>
+                `
+            },
+            history_fergie: {
+                badge: "ประวัติสโมสร • ค.ศ. 1986 - 2013",
+                title: "ยุคทองของ เซอร์ อเล็กซ์ เฟอร์กูสัน",
+                subtitle: "26 ปีแห่งความยิ่งใหญ่และแชมป์ 38 รายการ",
+                content: `
+                    <p><strong>เซอร์ อเล็กซ์ เฟอร์กูสัน</strong> เข้ามาคุมทีมในเดือนพฤศจิกายน ค.ศ. 1986 และพาสโมสรกลับมาคว้าแชมป์ลีกสูงสุดได้อีกครั้งในฤดูกาล 1992–93 ซึ่งเป็นปีแรกของยุคพรีเมียร์ลีก หลังรอคอยมานานถึง 26 ปี</p>
+                    <p>ภายใต้การคุมทีมของเฟอร์กูสัน แมนเชสเตอร์ ยูไนเต็ด คว้าแชมป์พรีเมียร์ลีกได้ถึง <strong>13 สมัย</strong>, เอฟเอ คัพ 5 สมัย, ลีกคัพ 4 สมัย และยูฟ่า แชมเปียนส์ลีก 2 สมัย (1999 และ 2008)</p>
+                    <p>เอกลักษณ์สำคัญของยุคนี้คือการผสมผสานนักเตะระดับโลกเข้ากับเยาวชนชุดตำนาน <strong>Class of '92</strong> (เดวิด เบ็คแฮม, ไรอัน กิ๊กส์, พอล สโคลส์, แกรี เนวิลล์, ฟิล เนวิลล์ และ นิคกี้ บัตต์) รวมถึงการสร้างนักเตะระดับบัลลงดอร์อย่าง <strong>คริสเตียโน โรนัลโด</strong></p>
+                `
+            },
+            history_modern: {
+                badge: "ประวัติสโมสร • ค.ศ. 2013 - ปัจจุบัน",
+                title: "ยุคสมัยใหม่และการเดินหน้าทวงคืนความยิ่งใหญ่",
+                subtitle: "จากยุคเปลี่ยนผ่านสู่โครงสร้างฟุตบอลสมัยใหม่",
+                content: `
+                    <p>หลังการประกาศวางมือของเซอร์ อเล็กซ์ เฟอร์กูสัน ในปี 2013 สโมสรได้ผ่านการบริหารงานของผู้จัดการทีมหลายท่าน อาทิ หลุยส์ ฟาน กัล (แชมป์ FA Cup 2016), โชเซ มูรินโญ (แชมป์ยูโรปาลีก และ ลีกคัพ 2017) และ เอริก เทน ฮาก (แชมป์คาราบาว คัพ 2023 และ FA Cup 2024)</p>
+                    <p>ในยุคปัจจุบัน สโมสรได้รับการปรับโครงสร้างการบริหารด้านฟุตบอลครั้งสำคัญ พร้อมแผนการพัฒนาสนามโอลด์แทรฟฟอร์ดและศูนย์ฝึกแคร์ริงตัน เพื่อยกระดับทีมให้กลับมาลุ้นแชมป์รายการใหญ่ในระยะยาว</p>
+                `
+            },
+
+            // --- หมวดถ้วยรางวัล ---
+            trophy_league: {
+                badge: "เกียรติยศ • 20 สมัย",
+                title: "แชมป์ลีกสูงสุดของอังกฤษ 20 สมัย",
+                subtitle: "ทำเนียบปีที่คว้าแชมป์ดิวิชั่น 1 เดิม และ พรีเมียร์ลีก",
+                content: `
+                    <p>แมนเชสเตอร์ ยูไนเต็ด ครองสถิติคว้าแชมป์ลีกสูงสุดของอังกฤษมากที่สุดร่วมที่ <strong>20 สมัย</strong> แบ่งออกเป็น:</p>
+                    <ul class="list-disc pl-5 space-y-1 text-gray-200">
+                        <li><strong>ยุคดิวิชั่น 1 เดิม (7 สมัย):</strong> 1907–08, 1910–11, 1951–52, 1955–56, 1956–57, 1964–65, 1966–67</li>
+                        <li><strong>ยุคพรีเมียร์ลีก (13 สมัย):</strong> 1992–93, 1993–94, 1995–96, 1996–97, 1998–99, 1999–2000, 2000–01, 2002–03, 2006–07, 2007–08, 2008–09, 2010–11, 2012–13</li>
+                    </ul>
+                `
+            },
+            trophy_ucl: {
+                badge: "เจ้ายุโรป • 3 สมัย",
+                title: "ยูฟ่า แชมเปียนส์ลีก (UEFA Champions League)",
+                subtitle: "3 ค่ำคืนแห่งความทรงจำของสาวกปีศาจแดง",
+                content: `
+                    <p><strong>1. ปี ค.ศ. 1968 (เวมบลีย์):</strong> เอาชนะ เบนฟิกา 4-1 ในช่วงต่อเวลาพิเศษ คว้าแชมป์ยุโรปสมัยแรกหลังโศกนาฏกรรมมิวนิก 10 ปี</p>
+                    <p><strong>2. ปี ค.ศ. 1999 (คัมป์นู):</strong> พลิกนรกแซงชนะ บาเยิร์น มิวนิก 2-1 จากประตูของ เท็ดดี เชอริงแฮม และ โอเล กุนนาร์ โซลชา ในช่วงทดเวลาบาดเจ็บ</p>
+                    <p><strong>3. ปี ค.ศ. 2008 (มอสโก):</strong> ดวลจุดโทษชนะ เชลซี 6-5 (เสมอในเวลา 1-1) โดย เอ็ดวิน ฟาน เดอร์ ซาร์ เซฟจุดโทษสำคัญได้สำเร็จ</p>
+                `
+            },
+            trophy_fa: {
+                badge: "ฟุตบอลถ้วยเก่าแก่ที่สุด • 13 สมัย",
+                title: "แชมป์เอฟเอ คัพ (The Emirates FA Cup)",
+                subtitle: "ความสำเร็จในรายการน็อกเอาต์สุดคลาสสิกของอังกฤษ",
+                content: `
+                    <p>แมนเชสเตอร์ ยูไนเต็ด คว้าแชมป์เอฟเอ คัพ ไปครองได้ทั้งหมด <strong>13 สมัย</strong> ในปี: 1909, 1948, 1963, 1977, 1983, 1985, 1990, 1994, 1996, 1999, 2004, 2016 และครั้งล่าสุดในปี <strong>2024</strong></p>
+                    <p>ในนัดชิงชนะเลิศปี 2024 ที่เวมบลีย์ ยูไนเต็ดโชว์ฟอร์มยอดเยี่ยมเอาชนะคู่ปรับร่วมเมืองอย่าง แมนเชสเตอร์ ซิตี้ 2-1 จากประตูของ อเลฮานโดร การ์นาโช และ ค็อบบี ไมนู</p>
+                `
+            },
+            trophy_efl: {
+                badge: "ลีกคัพ • 6 สมัย",
+                title: "แชมป์อีเอฟแอล คัพ / คาราบาว คัพ 6 สมัย",
+                subtitle: "เกียรติยศบอลถ้วยในประเทศ",
+                content: `
+                    <p>สโมสรคว้าแชมป์รายการนี้ได้ 6 สมัย ในปี <strong>1992, 2006, 2009, 2010, 2017 และ 2023</strong></p>
+                    <p>ไฮไลต์สำคัญคือปี 2017 ที่ ซลาตัน อิบราฮิโมวิช ยิงประตูชัยชนะเซาแธมป์ตัน 3-2 และปี 2023 ที่เอาชนะ นิวคาสเซิล ยูไนเต็ด 2-0 จากประตูของ คาเซมิโร และ มาร์คัส แรชฟอร์ด</p>
+                `
+            },
+            trophy_europa: {
+                badge: "ถ้วยยุโรป • 3 รายการ",
+                title: "ยูฟ่า ยูโรปาลีก และถ้วยยุโรปสำคัญ",
+                subtitle: "สโมสรอังกฤษที่คว้าถ้วยรางวัลครบทุกรายการหลักของยูฟ่า",
+                content: `
+                    <p>ในปี <strong>2017</strong> แมนเชสเตอร์ ยูไนเต็ด เอาชนะ อาแจ็กซ์ อัมสเตอร์ดัม 2-0 ในรอบชิงชนะเลิศที่กรุงสตอกโฮล์ม จากประตูของ ปอล ป็อกบา และ เฮนริค มคิตาร์ยาน ทำให้สโมสรกลายเป็น 1 ในไม่กี่ทีมของยุโรปที่คว้าแชมป์ครบทั้ง 3 ถ้วยใหญ่ของยูฟ่า (UCL, Europa League และ Cup Winners' Cup)</p>
+                `
+            },
+            trophy_world: {
+                badge: "แชมป์ระดับโลก • 23 ถ้วย",
+                title: "แชมป์สโมสรโลก และ คอมมิวนิตี ชิลด์",
+                subtitle: "ความยิ่งใหญ่บนเวทีโลกและศึกเปิดฤดูกาล",
+                content: `
+                    <p><strong>แชมป์สโมสรโลก (2 สมัย):</strong> คว้าแชมป์ Intercontinental Cup ในปี 1999 (ชนะ พัลไมรัส 1-0 ที่โตเกียว) และ FIFA Club World Cup ในปี 2008 (ชนะ แอลดียู กีโต 1-0 จากประตูของ เวย์น รูนีย์)</p>
+                    <p><strong>เอฟเอ คอมมิวนิตี ชิลด์ (21 สมัย):</strong> ครองสถิติคว้าโล่การกุศลเปิดฤดูกาลมากที่สุดในประวัติศาสตร์ฟุตบอลอังกฤษ</p>
+                `
+            },
+            treble_1999: {
+                badge: "ตำนานแห่งศตวรรษ • 1998/99",
+                title: "ทริปเปิลแชมป์ 1999: 10 วันเปลี่ยนประวัติศาสตร์",
+                subtitle: "พรีเมียร์ลีก • เอฟเอ คัพ • ยูฟ่า แชมเปียนส์ลีก",
+                content: `
+                    <p>ฤดูกาล 1998–99 คือฤดูกาลที่สมบูรณ์แบบที่สุดในประวัติศาสตร์สโมสร โดยแมนเชสเตอร์ ยูไนเต็ด กวาด 3 แชมป์ใหญ่ได้ภายในเวลาเพียง 10 วัน:</p>
+                    <ul class="list-disc pl-5 space-y-2 text-gray-200">
+                        <li><strong>16 พฤษภาคม 1999:</strong> ชนะ ท็อตแนม ฮ็อตสเปอร์ 2-1 คว้าแชมป์พรีเมียร์ลีก</li>
+                        <li><strong>22 พฤษภาคม 1999:</strong> ชนะ นิวคาสเซิล ยูไนเต็ด 2-0 คว้าแชมป์เอฟเอ คัพ</li>
+                        <li><strong>26 พฤษภาคม 1999:</strong> ยิง 2 ประตูช่วงทดเวลาบาดเจ็บ (นาที 90+1 และ 90+3) แซงชนะ บาเยิร์น มิวนิก 2-1 ที่สนามคัมป์นู คว้าแชมป์ยูฟ่า แชมเปียนส์ลีก</li>
+                    </ul>
+                `
+            },
+
+            // --- หมวดรายชื่อผู้เล่น ---
+            player_bruno: {
+                badge: "กองกลาง • เสื้อหมายเลข 8",
+                title: "บรูโน แฟร์นันด์ส (Bruno Fernandes)",
+                subtitle: "สัญชาติ: โปรตุเกส • ตำแหน่ง: กองกลางตัวรุก (กัปตันทีม)",
+                content: `
+                    <p>ย้ายจากสปอร์ติง ลิสบอน มาร่วมทีมในเดือนมกราคม ปี 2020 และสร้างผลกระทบต่อทีมได้ทันที ทั้งการทำประตูและการแอสซิสต์ จนได้รับการแต่งตั้งเป็นกัปตันทีมคนปัจจุบัน</p>
+                    <p><strong>จุดเด่น:</strong> การสร้างสรรค์โอกาสทำประตูสูงสุดอันดับต้นๆ ของยุโรป ความขยันทุ่มเทวิ่งไม่มีหมด และความเป็นผู้นำในสนาม</p>
+                `
+            },
+            player_mainoo: {
+                badge: "กองกลาง • เสื้อหมายเลข 37",
+                title: "ค็อบบี ไมนู (Kobbie Mainoo)",
+                subtitle: "สัญชาติ: อังกฤษ • ตำแหน่ง: กองกลางตัวกลาง",
+                content: `
+                    <p>ดาวรุ่งพุ่งแรงจากอะคาเดมีของแมนเชสเตอร์ ยูไนเต็ด ที่ก้าวขึ้นมาเป็นตัวหลักของทีมชุดใหญ่และทีมชาติอังกฤษชุดรองแชมป์ยูโร 2024</p>
+                    <p><strong>จุดเด่น:</strong> การเอาตัวรอดในพื้นที่แคบ ความนิ่งเกินอายุ และการยิงประตูสำคัญในเกมใหญ่</p>
+                `
+            },
+            player_garnacho: {
+                badge: "กองหน้า / ปีก • เสื้อหมายเลข 17",
+                title: "อเลฮานโดร การ์นาโช (Alejandro Garnacho)",
+                subtitle: "สัญชาติ: อาร์เจนตินา • ตำแหน่ง: ปีกซ้าย / ปีกขวา",
+                content: `
+                    <p>ปีกตัวจี๊ดทีมชาติอาร์เจนตินาชุดแชมป์โคปา อเมริกา 2024 เจ้าของรางวัลประตูยอดเยี่ยมแห่งปี <strong>FIFA Puskás Award 2024</strong> จากลูกยิงจักรยานอากาศสุดสวยใส่เอฟเวอร์ตัน</p>
+                    <p><strong>จุดเด่น:</strong> สปีดต้นที่จัดจ้าน การเลี้ยงบอลจี้เข้าหาแนวรับคู่แข่ง และความกระหายในการทำประตู</p>
+                `
+            },
+            player_hojlund: {
+                badge: "กองหน้า • เสื้อหมายเลข 9",
+                title: "ราสมุส ฮอยลุนด์ (Rasmus Højlund)",
+                subtitle: "สัญชาติ: เดนมาร์ก • ตำแหน่ง: กองหน้าตัวเป้า",
+                content: `
+                    <p>กองหน้าดาวรุ่งทีมชาติเดนมาร์ก ผู้เป็นแฟนบอลแมนเชสเตอร์ ยูไนเต็ด มาตั้งแต่วัยเด็ก สืบทอดเสื้อหมายเลข 9 อันเป็นตำนานของสโมสร</p>
+                    <p><strong>จุดเด่น:</strong> ความเร็วในการวิ่งฉีกแนวรับ ร่างกายที่แข็งแกร่ง และการจบสกอร์ด้วยเท้าซ้ายที่ทรงพลัง</p>
+                `
+            },
+            player_rashford: {
+                badge: "กองหน้า • เสื้อหมายเลข 10",
+                title: "มาร์คัส แรชฟอร์ด (Marcus Rashford)",
+                subtitle: "สัญชาติ: อังกฤษ • ตำแหน่ง: กองหน้า / ปีกซ้าย",
+                content: `
+                    <p>ผลผลิตจากอะคาเดมีที่ประเดิมสนามชุดใหญ่ด้วยวัย 18 ปี พร้อมยิง 2 ประตูทั้งในเกมยูโรปาลีกและพรีเมียร์ลีก ปัจจุบันลงสนามให้สโมสรเกิน 400 นัด และยิงไปมากกว่า 130 ประตู</p>
+                    <p><strong>จุดเด่น:</strong> ความเร็วในการโต้กลับ ลูกยิงไกลที่หนักหน่วง และการเล่นเกมรุกด้านข้าง</p>
+                `
+            },
+            player_martinez: {
+                badge: "กองหลัง • เสื้อหมายเลข 6",
+                title: "ลิซานโดร มาร์ติเนซ (Lisandro Martínez)",
+                subtitle: "สัญชาติ: อาร์เจนตินา • ตำแหน่ง: เซ็นเตอร์แบ็ก",
+                content: `
+                    <p>ปราการหลังดีกรีแชมป์ฟุตบอลโลก 2022 และโคปา อเมริกา 2024 ขวัญใจแฟนบอลในถิ่นโอลด์แทรฟฟอร์ด ด้วยสไตล์การเล่นที่ทุ่มเทเกินร้อยทุกวินาที</p>
+                    <p><strong>จุดเด่น:</strong> การเข้าปะทะที่ดุดันแม่นยำ และการจ่ายบอลทะลุไลน์จากแดนหลัง</p>
+                `
+            },
+            player_deligt: {
+                badge: "กองหลัง • เสื้อหมายเลข 4",
+                title: "มัทไธส์ เดอ ลิกต์ (Matthijs de Ligt)",
+                subtitle: "สัญชาติ: เนเธอร์แลนด์ • ตำแหน่ง: เซ็นเตอร์แบ็ก",
+                content: `
+                    <p>กองหลังทีมชาติเนเธอร์แลนด์ผู้ผ่านประสบการณ์ระดับสูงกับ อาแจ็กซ์, ยูเวนตุส และ บาเยิร์น มิวนิก ก่อนย้ายมาเสริมความแข็งแกร่งให้แนวรับปีศาจแดง</p>
+                    <p><strong>จุดเด่น:</strong> ลูกกลางอากาศที่ยอดเยี่ยม ความเป็นผู้นำ และการยืนตำแหน่งเกมรับ</p>
+                `
+            },
+            player_onana: {
+                badge: "ผู้รักษาประตู • เสื้อหมายเลข 24",
+                title: "อ็องเดร โอนานา (André Onana)",
+                subtitle: "สัญชาติ: แคเมอรูน • ตำแหน่ง: ผู้รักษาประตู",
+                content: `
+                    <p>ผู้รักษาประตูสไตล์ Modern Sweeper-Keeper ที่ช่วยเซฟจังหวะสำคัญให้ทีมได้มากมาย พร้อมความสามารถในการจ่ายบอลเปิดเกมจากแนวรับ</p>
+                    <p><strong>จุดเด่น:</strong> ปฏิกิริยาการพุ่งเซฟระยะประชิด และการเปิดบอลยาวที่แม่นยำ</p>
+                `
+            }
+        };
+
+        // 2. ฟังก์ชันเปิดหน้าต่าง Modal อ่านเพิ่มเติม
+        function openModal(articleKey) {
+            const data = modalDatabase[articleKey];
+            if (!data) return;
+
+            document.getElementById('modal-badge').textContent = data.badge;
+            document.getElementById('modal-title').textContent = data.title;
+            document.getElementById('modal-subtitle').textContent = data.subtitle;
+            document.getElementById('modal-body').innerHTML = data.content;
+
+            const modal = document.getElementById('article-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden'; // ล็อกการเลื่อนพื้นหลังขณะเปิด Modal
+        }
+
+        // 3. ฟังก์ชันปิดหน้าต่าง Modal
+        function closeModal() {
+            const modal = document.getElementById('article-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        // ปิด Modal เมื่อคลิกพื้นที่สีดำด้านนอกกล่องข้อความ หรือกดปุ่ม ESC
+        document.getElementById('article-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // 4. ฟังก์ชันกรองรายชื่อนักเตะตามตำแหน่ง (ทั้งหมด / GK / DEF / MID / FWD)
+        function filterSquad(position, clickedBtn) {
+            // อัปเดตสีปุ่มที่ถูกเลือก
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-[#DA291C]', 'text-white', 'shadow-md');
+                btn.classList.add('bg-[#1E1E1E]', 'text-gray-300', 'border', 'border-white/10');
+            });
+            clickedBtn.classList.remove('bg-[#1E1E1E]', 'text-gray-300', 'border', 'border-white/10');
+            clickedBtn.classList.add('bg-[#DA291C]', 'text-white', 'shadow-md');
+
+            // แสดง/ซ่อน การ์ดผู้เล่นตามตำแหน่งที่เลือก
+            const cards = document.querySelectorAll('.player-card');
+            cards.forEach(card => {
+                if (position === 'all' || card.getAttribute('data-position') === position) {
+                    card.classList.remove('player-hidden');
+                } else {
+                    card.classList.add('player-hidden');
+                }
+            });
+        }
+
+        // 5. ฟังก์ชันคัดลอก Line ID ของคุณบุญยาพร จุมปา (nanfa11)
+        function copyLineId() {
+            const lineId = 'nanfa11';
+            const tempInput = document.createElement('input');
+            tempInput.value = lineId;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            // แสดงข้อความแจ้งเตือนว่าคัดลอกสำเร็จ
+            const btnText = document.getElementById('copy-btn-text');
+            const feedback = document.getElementById('copy-feedback');
+            btnText.textContent = 'คัดลอกแล้ว!';
+            feedback.classList.remove('hidden');
+
+            setTimeout(() => {
+                btnText.textContent = 'คัดลอก ID';
+                feedback.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 6. ระบบเปิด-ปิดเมนูบนหน้าจอมือถือ (Mobile Menu Toggle)
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
